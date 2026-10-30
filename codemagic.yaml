@@ -15,19 +15,3 @@ workflows:
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
       - build/**/outputs/**/*.apk
-
-  ios-workflow:
-    name: 1LAVO iOS app (unsigned)
-    max_build_duration: 90
-    instance_type: mac_mini_m2
-    environment:
-      flutter: stable
-    scripts:
-      - name: Generate missing Android and iOS project folders
-        script: flutter create . --platforms=android,ios
-      - name: Get Flutter packages
-        script: flutter pub get
-      - name: Build iOS app without code signing
-        script: flutter build ios --release --no-codesign
-    artifacts:
-      - build/ios/iphoneos/*.app
