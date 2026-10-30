@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>1LAVO – Réservation</title>
+<style>
+:root{--acc:#0d47a1;--acc2:#1976d2;--bg:#eaf2fc;--sheet:#fff;--card:#f1f6fd;--line:#d5e3f5;--txt:#0b2545;--mut:#64748b;--mapbg:#dbe9fa;--road:#fff;--block:#c7dcf5;--err:#d32f2f;--onacc:#fff;color-scheme:light dark;box-sizing:border-box}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--acc:#2f80ed;--acc2:#4c9aff;--bg:#101418;--sheet:#1c2026;--card:#272c33;--line:#343a42;--txt:#f2f5f8;--mut:#9aa5b1;--mapbg:#262b31;--road:#3a424b;--block:#2d333a}}
+:root[data-theme="dark"]{--acc:#2f80ed;--acc2:#4c9aff;--bg:#101418;--sheet:#1c2026;--card:#272c33;--line:#343a42;--txt:#f2f5f8;--mut:#9aa5b1;--mapbg:#262b31;--road:#3a424b;--block:#2d333a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+.map{position:sticky;top:0;height:42vh;min-height:250px;background:var(--mapbg);overflow:hidden;z-index:1}
+.map svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.fab{position:absolute;width:48px;height:48px;border-radius:50%;border:0;background:var(--sheet);color:var(--txt);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);cursor:pointer;z-index:3}
+.fab svg{width:22px;height:22px}
+#menuBtn{top:calc(env(safe-area-inset-top,0px) + 14px);right:14px}
+#gpsBtn{bottom:44px;left:14px}
+.brand{position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);left:16px;z-index:3;font-weight:900;font-style:italic;font-size:26px;color:var(--acc);letter-spacing:.5px}
+.brand small{display:block;font-size:9px;font-style:normal;letter-spacing:2px;font-weight:700;color:var(--mut)}
+.pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-78%);display:flex;flex-direction:column;align-items:center;z-index:2}
+.bubble{background:var(--sheet);border-radius:14px;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:240px;text-align:center}
+.bubble small{display:block;font-size:11px;color:var(--mut)}
+.bubble b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
+.pinicon{margin-top:6px;width:46px;height:46px;border-radius:14px;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.pinicon svg{width:26px;height:26px}
+.stick{width:3px;height:22px;background:var(--acc);border-radius:2px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 7px rgba(47,128,237,.25)}
+.sheet{position:relative;z-index:2;margin-top:-26px;background:var(--sheet);border-radius:28px 28px 0 0;padding:10px 16px 130px;box-shadow:0 -6px 24px rgba(0,0,0,.15);min-height:70vh}
+.handle{width:44px;height:5px;background:var(--line);border-radius:3px;margin:0 auto 14px}
+.search{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:16px;padding:0 14px}
+.search svg{width:22px;height:22px;color:var(--mut);flex:none}
+.search input{border:0;background:transparent;box-shadow:none;font-size:17px;padding:17px 0;flex:1;min-width:0}
+.place{display:flex;align-items:center;gap:12px;padding:14px 4px;border:0;background:transparent;width:100%;text-align:left;color:var(--txt);font-size:16px;cursor:pointer;border-bottom:1px solid var(--line)}
+.place svg{width:22px;height:22px;color:var(--mut);flex:none}
+.place span{flex:1}
+.place i{font-style:normal;color:var(--mut);font-size:12px}
+h3{font-size:17px;margin:22px 0 10px}
+.cards{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;gap:10px}
+.sv{position:relative;border-radius:20px;background:var(--card);padding:14px;cursor:pointer;border:2px solid transparent;overflow:hidden;min-height:96px;display:flex;flex-direction:column;justify-content:space-between}
+.sv b{font-size:16px}
+.sv p{margin:4px 0 0;font-size:11.5px;color:var(--mut);line-height:1.35}
+.sv em{font-style:normal;font-weight:800;font-size:14px;color:var(--acc2);margin-top:8px}
+.sv.big{grid-column:2;grid-row:1/3;background:linear-gradient(160deg,var(--acc),var(--acc2));color:#fff}
+.sv.big p,.sv.big em{color:rgba(255,255,255,.88)}
+.sv.big::after{content:"";position:absolute;right:-30px;bottom:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.12)}
+.sv.wide{grid-column:1/3}
+.tag{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;background:rgba(255,255,255,.22);padding:3px 8px;border-radius:10px}
+.sv.on{border-color:var(--acc2);box-shadow:0 0 0 3px rgba(76,154,255,.28)}
+.sv.on::before{content:"✓";position:absolute;top:8px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--acc2);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:2}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.seg div{background:var(--card);border-radius:16px;text-align:center;padding:10px 4px;cursor:pointer;border:2px solid transparent}
+.seg b{display:block;font-size:20px;color:var(--acc2)}
+.seg small{font-size:10.5px;color:var(--mut);line-height:1.2;display:block}
+.seg div.on{background:var(--acc);}
+.seg div.on b,.seg div.on small{color:#fff}
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px;color:var(--mut)}
+input,select,textarea{width:100%;padding:15px;border:1.5px solid transparent;border-radius:14px;font-size:16px;background:var(--card);color:var(--txt);font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc2)}
+.search:focus-within{box-shadow:0 0 0 2px var(--acc2)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--mut);margin-top:6px}
+.err{color:var(--err);font-size:12px;margin-top:5px;display:none}
+.bad .err{display:block}.bad input,.bad select,.bad.search{border-color:var(--err)}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--sheet);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 20px rgba(0,0,0,.18);display:flex;align-items:center;gap:14px;border-radius:22px 22px 0 0}
+.bar div{flex:none}.bar small{display:block;font-size:11px;color:var(--mut)}.bar b{font-size:22px}
+.go{flex:1;border:0;border-radius:16px;background:var(--acc);color:#fff;font-size:17px;font-weight:800;padding:16px;cursor:pointer}
+.perks{display:flex;justify-content:space-around;text-align:center;font-size:11px;color:var(--mut);margin-top:24px}
+.sec{width:100%;border:1.5px solid var(--acc2);background:transparent;color:var(--acc2);border-radius:14px;padding:14px;font-weight:700;font-size:15px;margin-top:10px;cursor:pointer}
+#done{display:none;position:fixed;inset:0;z-index:9;background:var(--bg);overflow:auto;padding:calc(30px + env(safe-area-inset-top,0px)) 18px 30px;text-align:center}
+#done .ok{width:76px;height:76px;border-radius:50%;background:var(--acc);color:#fff;font-size:38px;display:flex;align-items:center;justify-content:center;margin:10px auto}
+#done pre{text-align:left;white-space:pre-wrap;background:var(--sheet);border-radius:16px;padding:14px;font-size:13px;font-family:inherit;line-height:1.5}
+#menu{display:none;position:fixed;inset:0;z-index:8;background:rgba(0,0,0,.5)}
+#menu div{position:absolute;right:0;top:0;bottom:0;width:78%;max-width:320px;background:var(--sheet);padding:calc(30px + env(safe-area-inset-top,0px)) 20px;font-size:15px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="map">
+  <svg class="bg" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="400" height="320" fill="var(--mapbg)"/>
+    <g fill="var(--block)"><rect x="10" y="20" width="90" height="70" rx="6"/><rect x="120" y="10" width="110" height="60" rx="6"/><rect x="250" y="25" width="130" height="65" rx="6"/><rect x="20" y="120" width="70" height="80" rx="6"/><rect x="250" y="130" width="60" height="70" rx="6"/><rect x="330" y="125" width="60" height="85" rx="6"/><rect x="30" y="235" width="120" height="70" rx="6"/><rect x="190" y="240" width="90" height="70" rx="6"/><rect x="300" y="240" width="90" height="70" rx="6"/></g>
+    <g stroke="var(--road)" stroke-width="12" fill="none" stroke-linecap="round"><path d="M-10 105 L410 112"/><path d="M-10 222 L410 215"/><path d="M110 -10 L118 330"/><path d="M235 -10 L240 330"/><path d="M-10 30 Q200 60 410 20" stroke-width="7"/></g>
+    <g fill="#0d47a1" opacity=".75"><rect x="60" y="98" width="22" height="11" rx="5"/><rect x="305" y="205" width="22" height="11" rx="5"/><rect x="104" y="260" width="11" height="22" rx="5"/><rect x="232" y="60" width="11" height="22" rx="5"/></g>
+  </svg>
+  <div class="brand"><span><i>1</i>LAVO</span><small>LAVAGE AUTO PRO</small></div>
+  <button class="fab" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <button class="fab" id="gpsBtn" aria-label="Ma position"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
+  <div class="pin">
+    <div class="bubble"><small>Point de lavage</small><b id="bub">Votre adresse</b></div>
+    <div class="pinicon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9 7 6 10 6 14a6 6 0 0012 0c0-4-3-7-6-12z"/></svg></div>
+    <div class="stick"></div><div class="dot"></div>
+  </div>
+</div>
+
+<div class="sheet">
+  <div class="handle"></div>
+  <div class="search" id="f_adr">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="adr" autocomplete="street-address" placeholder="Où venir laver votre voiture ?">
+  </div>
+  <div class="err" id="e_adr" style="padding-left:4px">Indiquez votre adresse.</div>
+  <button class="place" data-q="Domicile – "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Domicile</span><i>Casablanca</i></button>
+  <button class="place" data-q="Bureau – "><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Bureau / Entreprise</span><i>Casablanca</i></button>
+  <button class="place" id="gpsRow" style="border:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg><span id="gpsTxt">Utiliser ma position GPS</span></button>
+
+  <h3>Choisissez votre formule</h3>
+  <div class="cards" id="svcs"></div>
+  <div class="err" id="e_svc" style="margin-top:6px">Choisissez une formule.</div>
+
+  <h3>Taille de la voiture</h3>
+  <div class="seg" id="sizes"></div>
+  <div class="err" id="e_size" style="margin-top:6px">Choisissez la taille.</div>
+
+  <h3>Votre voiture</h3>
+  <div class="row">
+    <div><input id="modele" placeholder="Marque / modèle"></div>
+    <div><input id="couleur" placeholder="Couleur"></div>
+  </div>
+  <div style="margin-top:10px"><input id="plaque" placeholder="Plaque (facultatif)"></div>
+
+  <h3>Quand ?</h3>
+  <div class="row">
+    <div id="f_date"><input id="date" type="date"><div class="err">Date requise.</div></div>
+    <div id="f_heure"><select id="heure"><option value="">Heure</option></select><div class="err">Heure requise.</div></div>
+  </div>
+  <div style="margin-top:10px"><textarea id="note" rows="2" placeholder="Remarques : étage, code d’accès…"></textarea></div>
+
+  <h3>Vos coordonnées</h3>
+  <div id="f_nom"><input id="nom" autocomplete="name" placeholder="Nom complet"><div class="err">Saisissez votre nom.</div></div>
+  <div id="f_tel" style="margin-top:10px"><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="Téléphone : 06 12 34 56 78"><div class="err">Numéro marocain invalide.</div></div>
+  <div id="f_tel2" style="margin-top:10px"><input id="tel2" type="tel" inputmode="tel" placeholder="Confirmez votre téléphone"><div class="err">Les numéros ne correspondent pas.</div></div>
+  <div class="perks"><div>💧<br>Sans eau</div><div>🏠<br>À domicile</div><div>✨<br>Résultat pro</div><div>🌿<br>Produits sûrs</div></div>
+</div>
+
+<div class="bar"><div><small>Total estimé</small><b id="total">— MAD</b></div><button class="go" id="send" type="button">Réserver</button></div>
+
+<div id="menu"><div><b style="font-size:22px;font-style:italic">1LAVO</b><br>Lavage auto professionnel sans eau.<br>On vient jusqu’à vous à Casablanca.<br><br>💧 Économie d’eau<br>🏠 Service à domicile<br>✨ Résultat professionnel<br>🌿 Produits sûrs</div></div>
+
+<div id="done">
+  <div class="ok">✓</div>
+  <h2 style="margin:6px 0">Demande prête !</h2>
+  <p style="font-size:14px;color:var(--mut)">Dernière étape : appuyez sur un bouton ci-dessous pour envoyer votre demande à 1LAVO.</p>
+  <pre id="recap"></pre>
+  <a class="go" id="aMail" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">✉️ Ouvrir mon application e-mail</a>
+  <a class="sec" id="aGmail" target="_blank" rel="noopener" style="display:block;text-decoration:none;text-align:center">Ouvrir Gmail</a>
+  <button class="sec" id="copyAdr" type="button">Copier l’adresse 1lavo.maroc@email.com</button>
+  <button class="sec" id="copy" type="button">Copier la demande</button>
+  <button class="sec" id="back" type="button">Nouvelle réservation</button>
+</div>
+
+<script>
+// ====== À MODIFIER ======
+var EMAIL_DEST = "1lavo.maroc@email.com";
+// ========================
+var SIZES=[["S","Petite","Citadine"],["M","Moyenne","Berline / SUV compact"],["L","Grande","Berline / SUV"],["XL","Très grande","4x4 / Van"]];
+var SVCS=[
+ {n:"Extérieur",d:"Lavage, jantes, séchage et finition",p:[30,30,40,60],c:""},
+ {n:"Intérieur",d:"Aspiration, vitres, tableau de bord, parfum",p:[40,50,60,70],c:""},
+ {n:"Complet",d:"Extérieur + intérieur, finition brillance",p:[50,60,70,80],c:"big",t:"Le + demandé"},
+ {n:"Gold",d:"Complet + détachage, cire, moteur, parfum premium",p:[90,120,140,160],c:"wide"}
+];
+var ORDER=[0,1,2,3];
+var size=-1,svc=-1,mailto="",recap="",gps="";
+function $(i){return document.getElementById(i)}
+function renderSizes(){
+ $("sizes").innerHTML=SIZES.map(function(s,i){return '<div class="'+(i===size?'on':'')+'" data-i="'+i+'"><b>'+s[0]+'</b><small>'+s[1]+'</small></div>'}).join("");
+ Array.prototype.forEach.call($("sizes").children,function(el){el.onclick=function(){size=+el.dataset.i;$("e_size").style.display="none";renderSizes();renderSvcs()}});
+}
+function renderSvcs(){
+ $("svcs").innerHTML=SVCS.map(function(s,i){
+  var pr=size>=0?s.p[size]+" MAD":"dès "+s.p[0]+" MAD";
+  return '<div class="sv '+s.c+(i===svc?' on':'')+'" data-i="'+i+'">'+(s.t?'<span class="tag">'+s.t+'</span>':'')+'<div><b>'+s.n+'</b><p>'+s.d+'</p></div><em>'+pr+'</em></div>';
+ }).join("");
+ Array.prototype.forEach.call($("svcs").children,function(el){el.onclick=function(){svc=+el.dataset.i;$("e_svc").style.display="none";renderSvcs()}});
+ $("total").textContent=(size>=0&&svc>=0)?SVCS[svc].p[size]+" MAD":"— MAD";
+}
+(function(){
+ var h=$("heure"),o="";
+ for(var t=8;t<=19;t++){["00","30"].forEach(function(m){if(t===19&&m==="30")return;var v=(t<10?"0":"")+t+":"+m;o+='<option value="'+v+'">'+v+'</option>'})}
+ h.insertAdjacentHTML("beforeend",o);
+ var d=new Date(),p=function(n){return n<10?"0"+n:n};
+ $("date").min=d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+})();
+function cleanTel(v){v=v.replace(/[\s.\-()]/g,"");if(v.indexOf("+212")===0)v="0"+v.slice(4);else if(v.indexOf("00212")===0)v="0"+v.slice(5);return v}
+function validTel(v){return /^0[5-7]\d{8}$/.test(v)}
+function bad(id,c){$(id).classList.toggle("bad",c);return c}
+$("adr").oninput=function(){$("bub").textContent=this.value.trim()||"Votre adresse"};
+Array.prototype.forEach.call(document.querySelectorAll(".place[data-q]"),function(b){b.onclick=function(){var a=$("adr");a.value=b.dataset.q;a.focus();a.oninput()}});
+function locate(){
+ if(!navigator.geolocation){$("gpsTxt").textContent="Position indisponible, écrivez l’adresse";return}
+ $("gpsTxt").textContent="Localisation en cours…";
+ navigator.geolocation.getCurrentPosition(function(p){
+  gps="https://maps.google.com/?q="+p.coords.latitude.toFixed(6)+","+p.coords.longitude.toFixed(6);
+  $("gpsTxt").textContent="✓ Position GPS ajoutée";
+  if(!$("adr").value.trim()){$("bub").textContent="Ma position actuelle"}
+ },function(){$("gpsTxt").textContent="Impossible de vous localiser, écrivez l’adresse"},{enableHighAccuracy:true,timeout:12000});
+}
+$("gpsRow").onclick=locate;$("gpsBtn").onclick=locate;
+$("menuBtn").onclick=function(){$("menu").style.display="block"};
+$("menu").onclick=function(){this.style.display="none"};
+function fmtDate(v){var a=v.split("-");return a[2]+"/"+a[1]+"/"+a[0]}
+$("send").onclick=function(){
+ var tel=cleanTel($("tel").value),tel2=cleanTel($("tel2").value);
+ var adrBad=bad("f_adr",$("adr").value.trim().length<5&&!gps);
+ $("e_adr").style.display=adrBad?"block":"none";
+ var errs=[adrBad,bad("f_nom",$("nom").value.trim().length<3),bad("f_tel",!validTel(tel)),bad("f_tel2",tel!==tel2||!tel2),bad("f_date",!$("date").value),bad("f_heure",!$("heure").value)];
+ if(size<0){$("e_size").style.display="block";errs.push(true)}
+ if(svc<0){$("e_svc").style.display="block";errs.push(true)}
+ if(errs.some(Boolean)){var f=document.querySelector(".bad")||document.querySelector(".err[style*='block']");if(f)f.scrollIntoView({behavior:"smooth",block:"center"});return}
+ var S=SIZES[size],V=SVCS[svc];
+ var L=["NOUVELLE RÉSERVATION 1LAVO","","Client : "+$("nom").value.trim(),"Téléphone : "+tel,"","Adresse : "+($("adr").value.trim()||"-"),"Position GPS : "+(gps||"non partagée"),"","Voiture : "+S[0]+" ("+S[1]+" – "+S[2]+")","Modèle : "+($("modele").value.trim()||"-"),"Couleur : "+($("couleur").value.trim()||"-"),"Plaque : "+($("plaque").value.trim()||"-"),"","Formule : "+V.n,"Prix : "+V.p[size]+" MAD","","Date : "+fmtDate($("date").value),"Heure : "+$("heure").value,"Remarques : "+($("note").value.trim()||"-")];
+ recap=L.join("\n");
+ var subj="Réservation 1LAVO – "+$("nom").value.trim()+" – "+fmtDate($("date").value)+" "+$("heure").value;
+ mailto="mailto:"+EMAIL_DEST+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(recap);
+ $("recap").textContent=recap;$("done").style.display="block";$("done").scrollTop=0;
+ $("aMail").href=mailto;$("aGmail").href="https://mail.google.com/mail/?view=cm&fs=1&to="+EMAIL_DEST+"&su="+encodeURIComponent(subj)+"&body="+encodeURIComponent(recap);
+};
+$("copyAdr").onclick=function(){var b=$("copyAdr");try{navigator.clipboard.writeText(EMAIL_DEST).then(function(){b.textContent="Adresse copiée ✓"},function(){b.textContent="Copie impossible"})}catch(e){b.textContent="Copie impossible"}};
+$("copy").onclick=function(){var b=$("copy");try{navigator.clipboard.writeText(recap).then(function(){b.textContent="Copié ✓"},function(){b.textContent="Copie impossible"})}catch(e){b.textContent="Copie impossible"}};
+$("back").onclick=function(){$("done").style.display="none";window.scrollTo(0,0)};
+renderSizes();renderSvcs();
+</script>
+</body>
+</html>
