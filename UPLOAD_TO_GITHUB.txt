@@ -1,0 +1,8 @@
+1LAVO upload checklist:
+1. Extract this ZIP on your phone.
+2. Open the inner folder named 'lavo'.
+3. Upload its CONTENTS to the root of your GitHub repository.
+4. Confirm that pubspec.yaml, codemagic.yaml, and the lib folder appear directly on the repository main page.
+5. Connect the repository to Codemagic and start the Android workflow.
+
+Note: iOS distribution requires Apple code signing; the iOS workflow here builds an unsigned .app only.
